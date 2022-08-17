@@ -9,6 +9,15 @@ CREATE TABLE `products` (
 );
 INSERT INTO `products` (name,price, discounted)
 VALUES ('piyush', 400, 5);
+<bean id="dataSource"
+		class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName"
+			value="com.mysql.cj.jdbc.Driver" />
+		<property name="url"
+			value="jdbc:mysql://localhost:3306/restservices" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+	</bean>
 
 [Travis badge]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa.svg
 [Travis build]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa
