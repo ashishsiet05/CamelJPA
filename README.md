@@ -7,6 +7,8 @@ CREATE TABLE `products` (
   `discounted` int NOT NULL,
   PRIMARY KEY (`id`)
 );
+INSERT INTO `products` (name,price, discounted)
+VALUES ('piyush', 400, 5);
 
 [Travis badge]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa.svg
 [Travis build]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa
