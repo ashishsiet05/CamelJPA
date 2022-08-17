@@ -1,5 +1,13 @@
 [![Build Status][Travis badge]][Travis build]
 
+CREATE TABLE `products` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `price` int NOT NULL,
+  `discounted` int NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
 [Travis badge]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa.svg
 [Travis build]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa
 
