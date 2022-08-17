@@ -18,7 +18,10 @@ VALUES ('piyush', 400, 5);
 		<property name="username" value="root" />
 		<property name="password" value="root" />
 	</bean>
-
+     <bean id="sqlComponent"
+		class="org.apache.camel.component.sql.SqlComponent">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
 [Travis badge]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa.svg
 [Travis build]: https://travis-ci.org/astefanutti/spring-boot-camel-rest-jpa
 
