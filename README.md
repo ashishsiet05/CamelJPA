@@ -264,3 +264,144 @@ This can be achieved by setting the `namespace.cleanup.enabled` system variable
 to `false`, e.g.:
 
     $ mvn failsafe:integration-test -Dnamespace.cleanup.enabled=false
+    
+    
+    package com.camel.soap;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.namespace.QName;
+
+import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.cxf.CxfComponent;
+import org.apache.camel.component.cxf.CxfEndpoint;
+import org.apache.camel.component.cxf.DataFormat;
+import org.apache.camel.component.cxf.common.message.CxfConstants;
+import org.apache.camel.model.dataformat.JaxbDataFormat;
+import org.oorsprong.websamples.CountryInfoService;
+import org.oorsprong.websamples.CountryName;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+import org.springframework.ws.server.endpoint.annotation.Namespace;
+import org.tempuri.AdditionalCxfPayloadConverters;
+
+import ch.qos.logback.core.Context;
+
+
+@Component
+@Configuration
+public class RestControler extends RouteBuilder {
+	public static final String SERVICE_ADDRESS = "http://www.dneonline.com/calculator.asmx";
+	public static final String ENDPOINT = "cxf:bean:cxfEndpoint";
+	public static final String CountrySERVICE_ADDRESS = "https://www.w3schools.com/xml/tempconvert.asmx";
+	public static final String countryENDPOINT = "cxf:bean:cxfcountryEndpoint";
+	                    
+	
+	@Autowired
+	private CamelContext context;
+	 
+	//Namespace ns=new Namesp
+	@Override
+	public void configure() throws Exception {
+		JaxbDataFormat jaxb=new JaxbDataFormat();
+		 jaxb.setContextPath("com.camel.soap");
+		
+		// TODO Auto-generated method stub
+		from("timer:foo?period=50m")
+		. log("timer started body ")
+                //.log("request body A=${body.intA} and B=${body.intB}").
+		       
+				.setHeader(CxfConstants.OPERATION_NAME, constant("Add"))
+				.setHeader(CxfConstants.OPERATION_NAMESPACE, constant("http://tempuri.org/"))
+				//for payload format
+				//.bean(AdditionalCxfPayloadConverters.class,"toCxfPayload(${body})")
+				
+				//for pojo mode
+				.bean(GetCalculatorRequestBuilder.class).setBody(simple("${header.jaxb}")).convertBodyTo(Add.class).log("request body ${body}")
+			    .setBody(simple("${exchangeProperty.param}"))
+				.to("cxf://http://www.dneonline.com/calculator.asmx" +"?serviceClass=com.camel.soap.CalculatorSoap"+"&wsdlURL=/calculator.wsdl"+"&portName=CalculatorSoap"+"&dataFormat=POJO"+"&loggingFeatureEnabled=true")
+				//.to(ENDPOINT)
+				
+				//.to(ENDPOINT)
+				.log("reponse body ===${body} ");
+   
+		
+		from("timer:coo?period=50m").autoStartup(false)
+        .log("timer started body ")
+		.setHeader("operationName", constant("CelsiusToFahrenheit"))
+	  .setHeader("operationNamespace", constant("https://www.w3schools.com/xml/"))
+		//for payload format
+		.bean(AdditionalCxfPayloadConverters.class,"countryCxfPayload")
+		
+		//for pojo mode
+		// .bean(GetCalculatorRequestBuilder.class)
+		//
+		//.to("cxf://http://www.dneonline.com/calculator.asmx" +"?serviceClass=com.camel.soap.CalculatorSoap"+"&wsdlURL=/calculator.wsdl"+"&portName=CalculatorSoap"+"&dataFormat=POJO"+"&loggingFeatureEnabled=true")
+		//.to(ENDPOINT)
+		
+		.to(countryENDPOINT);
+		//.bean(AdditionalCxfPayloadConverters.class,"cxfPayLoadToNode")
+		
+		
+
+}
+		
+	
+	
+
+	
+	  @Bean(name = {"cxfEndpoint"}) 
+	  public CxfEndpoint customerServiceEndpoint() {
+		    //CxfComponent cxfComponent = new CxfComponent(context);
+		    CxfEndpoint cxfEndpoint = new CxfEndpoint();
+		    cxfEndpoint.setAddress(SERVICE_ADDRESS);
+		    //cxfEndpoint.setServiceClass(CalculatorSoap.class);
+		    cxfEndpoint.setWsdlURL("/calculator.wsdl");
+		    cxfEndpoint.setLoggingFeatureEnabled(true);
+		    cxfEndpoint.setServiceName("{http://tempuri.org/}Calculator");
+   		    cxfEndpoint.setPortName("{http://tempuri.org/}CalculatorSoap");
+		     // in pojo mode only service class  and (service address or wsdl address)is needed 
+     	     // cxfEndpoint.setDataFormat(DataFormat.POJO);
+		     // in Payload mode only WSDL  and (service name and port name )is  needed
+		    cxfEndpoint.setDataFormat(DataFormat.PAYLOAD);
+		    cxfEndpoint.setLoggingFeatureEnabled(true);
+		    Map<String, Object> properties = new HashMap<String, Object>();
+		    properties.put("faultStackTraceEnabled", true);
+		    cxfEndpoint.setProperties(properties);
+	     return cxfEndpoint; 
+	  }
+	  
+	  @Bean(name = {"cxfcountryEndpoint"}) 
+	  public CxfEndpoint CountryServiceEndpoint() {
+		    //CxfComponent cxfComponent = new CxfComponent(context);
+		    CxfEndpoint cxfEndpoint1 = new CxfEndpoint();
+		    cxfEndpoint1.setAddress(CountrySERVICE_ADDRESS);
+		  //cxfEndpoint1.setServiceClass(CountryInfoService.class);
+		    cxfEndpoint1.setWsdlURL("https://www.w3schools.com/xml/tempconvert.asmx?WSDL");
+		    cxfEndpoint1.setLoggingFeatureEnabled(true);
+		   
+		     // in pojo mode only service class  and (service address or wsdl address)is needed 
+     	     // cxfEndpoint.setDataFormat(DataFormat.POJO);
+		     // in Payload mode only WSDL  and (service name and port name )is  needed
+		    cxfEndpoint1.setDataFormat(DataFormat.PAYLOAD);
+		    cxfEndpoint1.setLoggingFeatureEnabled(true);
+		    Map<String, Object> properties = new HashMap<String, Object>();
+		    properties.put("faultStackTraceEnabled", true);
+		    cxfEndpoint1.setProperties(properties);
+		     cxfEndpoint1.setPortName("{https://www.w3schools.com/xml/}TempConvertSoap");
+		     cxfEndpoint1.setServiceName("{https://www.w3schools.com/xml/}TempConvert");
+		     //cxfEndpoint1.setDefaultOperationNamespace("https://www.w3schools.com/xml/");
+		    // cxfEndpoint1.setDefaultOperationName("{https://www.w3schools.com/xml/}CountryName");
+		  //  QName qname = new QName("https://www.w3schools.com/xml/", "CountryInfoService");
+		   // cxfEndpoint1.setServiceNameAsQName(qname);
+	     return cxfEndpoint1; 
+	  }
+	 
+}
+
