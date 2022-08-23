@@ -27,6 +27,29 @@ VALUES ('piyush', 400, 5);
 
 # Spring Boot Camel REST / JPA Example
 
+  <plugin>
+    <groupId>org.apache.cxf</groupId>
+    <artifactId>cxf-codegen-plugin</artifactId>
+        <version>3.5.0</version>
+    <executions>
+        <execution>
+            <id>generate-sources</id>
+            <phase>generate-sources</phase>
+            <configuration>
+                <sourceRoot>${basedir}/src/main/java/org/country</sourceRoot>
+                <wsdlOptions>
+                    <wsdlOption>
+                        <wsdl>${basedir}/src/main/resources/wsdl/CountryInfo.wsdl</wsdl>
+                    </wsdlOption>
+                </wsdlOptions>
+            </configuration>
+            <goals>
+                <goal>wsdl2java</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+
 This example demonstrates how to use JPA and Camel's REST DSL
 to expose a RESTful API that performs CRUD operations on a database.
 
